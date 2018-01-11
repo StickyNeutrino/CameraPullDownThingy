@@ -7,7 +7,7 @@ CFLAGS = -Wall
 default : ImagePullDownThingy
 
 ImagePullDownThingy : CaptureThread.o main.o
-	$(CC) $(CFLAGS) -o ImagePullDownThingy main.o CaptureThread.o
+	$(CC) $(CFLAGS) -lcurl -o ImagePullDownThingy main.o CaptureThread.o
 
 main.o : main.cpp main.hpp
 	$(CC) $(CFLAGS) -c main.cpp
