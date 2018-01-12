@@ -12,8 +12,7 @@ using namespace std;
 
 const string ipAddr = "http://192.168.0.10/";
 
-void PlaceholderCaptureThread(){
-	string air = "http://192.168.0.10/";
+void CaptureThread(){
 	//Headers
 	struct curl_slist *headers = NULL;
 	headers = curl_slist_append(headers, "user-agent: OlympusCameraKit");

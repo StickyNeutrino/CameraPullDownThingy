@@ -3,7 +3,7 @@
 
 
 int main(){
-    std::thread captureThread(PlaceholderCaptureThread);
+    std::thread captureThread(CaptureThread);
 	
 	captureThread.join();
     return 0;
