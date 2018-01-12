@@ -10,6 +10,8 @@
 
 using namespace std;
 
+const string ipAddr = "http://192.168.0.10/";
+
 void PlaceholderCaptureThread(){
 	string air = "http://192.168.0.10/";
 	//Headers
@@ -19,23 +21,16 @@ void PlaceholderCaptureThread(){
 	
 	//Set up CURL
 	CURL *curl; //create state for CURL called "curl"
-	CURLcode res;
 	curl = curl_easy_init();
 	//End setup
 	
-	//request(air, "get_imglist.cgi?DIR=%2FDCIM%2F100OLYMP", curl, headers);
-	request(air, "get_connectmode.cgi", curl, headers);
-	request(air, "switch_cameramode.cgi?mode=rec", curl, headers);
-	request(air, "get_state.cgi", curl, headers);
-	request(air, "exec_takemisc.cgi?com=startliveview&port=5555", curl, headers);
-	request(air, "exec_takemotion.cgi?com=newstarttake", curl, headers);
+	initCamera(curl, headers);
 	
 	curl_easy_cleanup(curl); //ALWAYS HAVE THIS - frees CURL resources
 }
 
-void request(string link, string command, CURL *curl, struct curl_slist *headers) {
-	link = "http://192.168.0.10/";
-	link = link + command;
+void get(string command, CURL *curl, struct curl_slist *headers) {
+	string link = ipAddr + command;
 	
 	if (curl) {
 		curl_easy_setopt(curl, CURLOPT_URL, link.c_str());
@@ -48,3 +43,56 @@ void request(string link, string command, CURL *curl, struct curl_slist *headers
 		}
 	}
 }
+
+void post(string command, string body, CURL *curl, struct curl_slist *headers) {
+	string link = ipAddr + command;
+	
+	if (curl) {
+		struct postData bodyData;
+		bodyData.readptr = body.c_str();
+		bodyData.sizeleft = body.size();
+		curl_easy_setopt(curl, CURLOPT_URL, link.c_str());
+		curl_easy_setopt(curl, CURLOPT_POST, 1L);
+		curl_easy_setopt(curl,  CURLOPT_READFUNCTION, postDataCallBack);
+		curl_easy_setopt(curl,  CURLOPT_READDATA, &bodyData);
+		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+		CURLcode res = curl_easy_perform(curl);
+		
+		if (res != CURLE_OK) { //Check for errors
+			cout << "curl_easy_perform() failed: " << stderr << endl;
+			curl_easy_strerror(res);
+		}
+	}
+}
+
+void initCamera(CURL *curl, struct curl_slist *headers){
+	/*put camera in record mode*/
+	get("switch_cameramode.cgi?mode=rec", curl, headers);
+	/*tell camera not to save photos to SD card*/
+	post("set_camprop.cgi?com=set&propname=DESTINATION_FILE",File_WIFI_Data, curl, headers);
+}
+
+std::size_t postDataCallBack(char *buffer, size_t size, size_t nitems, void *instream){
+	struct postData *data = (struct postData *)instream;
+	size_t buffer_size = size * nitems;
+ 
+	if(data->sizeleft) {
+		/* copy as much as possible from the source to the destination */
+		size_t copy_this_much = data->sizeleft;
+		if(copy_this_much > buffer_size){
+			copy_this_much = buffer_size;
+		}
+		memcpy(buffer, data->readptr, copy_this_much);
+		
+		data->readptr += copy_this_much;
+		data->sizeleft -= copy_this_much;
+		return copy_this_much; /* we copied this many bytes */
+		
+	}
+	return 0;
+}
+
+
+
+
+
