@@ -13,6 +13,7 @@
 #include <string>
 #include <vector> 
 #include <mutex>
+#include <unistd.h>
 
 struct postData{
 	const char *readptr;

@@ -28,6 +28,12 @@ void CaptureThread(){
 	
 	initCamera(curl, headers);
 	
+	for(;;){
+		getPicture(curl, headers);
+		/* sleep defined in <unistd.h> */
+		sleep(2);
+	}
+	
 	curl_easy_cleanup(curl); //ALWAYS HAVE THIS - frees CURL resources
 }
 
