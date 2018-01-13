@@ -32,6 +32,7 @@ void CaptureThread(){
 }
 
 void get(string command, CURL *curl, struct curl_slist *headers) {
+	//make URL
 	string link = ipAddr + command;
 	
 	if (curl) {
@@ -47,6 +48,7 @@ void get(string command, CURL *curl, struct curl_slist *headers) {
 }
 
 void post(string command, string body, CURL *curl, struct curl_slist *headers) {
+	/* make URL */
 	string link = ipAddr + command;
 	
 	if (curl) {
@@ -55,12 +57,16 @@ void post(string command, string body, CURL *curl, struct curl_slist *headers) {
 		bodyData.sizeleft = body.size();
 		curl_easy_setopt(curl, CURLOPT_URL, link.c_str());
 		curl_easy_setopt(curl, CURLOPT_POST, 1L);
+		
+		/*Define the write callback and data for it */
 		curl_easy_setopt(curl,  CURLOPT_READFUNCTION, postDataCallBack);
 		curl_easy_setopt(curl,  CURLOPT_READDATA, &bodyData);
+		
 		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+		
 		CURLcode res = curl_easy_perform(curl);
 		
-		if (res != CURLE_OK) { //Check for errors
+		if (res != CURLE_OK) { /* Check for errors */
 			cout << "curl_easy_perform() failed: " << stderr << endl;
 			curl_easy_strerror(res);
 		}
@@ -68,12 +74,13 @@ void post(string command, string body, CURL *curl, struct curl_slist *headers) {
 }
 
 void initCamera(CURL *curl, struct curl_slist *headers){
-	/*put camera in record mode*/
+	/* put camera in record mode */
 	get("switch_cameramode.cgi?mode=rec", curl, headers);
-	/*tell camera not to save photos to SD card*/
+	/* tell camera not to save photos to SD card */
 	post("set_camprop.cgi?com=set&propname=DESTINATION_FILE",File_WIFI_Data, curl, headers);
 }
 
+/*basically this funiton gets called by libcurl when it needs data for a post*/
 std::size_t postDataCallBack(char *buffer, size_t size, size_t nitems, void *instream){
 	struct postData *data = (struct postData *)instream;
 	size_t buffer_size = size * nitems;
@@ -105,11 +112,16 @@ void getPicture(CURL *curl, struct curl_slist *headers){
 	if (curl) {
 		curl_easy_setopt(curl, CURLOPT_URL, link.c_str());
 		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, headers);
-		newestImage.clear();
-		curl_easy_setopt(curl,  CURLOPT_READDATA, &newestImage);
+		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, imageWriteCallback);
+		curl_easy_setopt(curl, CURLOPT_WRITEDATA, &newestImage);
 		
+		/* lock the mutex so other thread allways gets full image */
 		imageVectorMutex.lock();
+		
+		/* clear last image */
+		newestImage.clear();
+		
+		/* preform the request */
 		CURLcode res = curl_easy_perform(curl);
 		imageVectorMutex.unlock();
 		
@@ -121,13 +133,16 @@ void getPicture(CURL *curl, struct curl_slist *headers){
 }
 
 size_t imageWriteCallback(char *ptr, size_t size, size_t nmemb, void *userdata){
+	/* kinda ugly but just gets the vector from void pointer */
 	std::vector<int> imageVector = *((std::vector<int> *) userdata);
 	size_t incomingSize = size * nmemb;
 	if(!incomingSize){
+		/* if we don't get anything */
 		return 0;
 	}
 	int i = 0;
 	for(i; i * sizeof(char) < incomingSize; i++){
+		/* push all data into vector */
 		imageVector.push_back(ptr[i]);
 	}
 	return i * sizeof(char);
