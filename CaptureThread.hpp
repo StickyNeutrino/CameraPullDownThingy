@@ -23,7 +23,7 @@ void post(std::string link, std::string command, CURL *curl, std::string body,
 void get(std::string link, std::string command,
 			 CURL *curl, struct curl_slist *headers);
 
-void PlaceholderCaptureThread();
+void CaptureThread();
 
 void initCamera(CURL *curl, struct curl_slist *headers);
 //Set up camera options for use
