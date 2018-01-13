@@ -126,10 +126,10 @@ size_t imageWriteCallback(char *ptr, size_t size, size_t nmemb, void *userdata){
 	if(!incomingSize){
 		return 0;
 	}
-	
-	for(int i = 0; i * sizeof(char) < incomingSize; i++){
+	int i = 0;
+	for(i; i * sizeof(char) < incomingSize; i++){
 		imageVector.push_back(ptr[i]);
 	}
-	return incomingSize;
+	return i * sizeof(char);
 }
 
