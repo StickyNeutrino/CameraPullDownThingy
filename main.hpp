@@ -14,6 +14,7 @@
 #include "CaptureThread.hpp"
 #include <mutex>
 #include <vector>
+#include "DeliveryThread.hpp"
 
 std::vector<char> newestImage;
 std::mutex imageVectorMutex;
