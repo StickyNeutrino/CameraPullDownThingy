@@ -94,7 +94,7 @@ std::size_t postDataCallBack(char *buffer, size_t size, size_t nitems, void *ins
 	return 0;
 }
 
-void getPicture(Curl *curl, struct curl_slist *headers){
+void getPicture(CURL *curl, struct curl_slist *headers){
 	//take a picture
 	get("exec_takemotion.cgi", curl, headers);
 
@@ -121,8 +121,8 @@ void getPicture(Curl *curl, struct curl_slist *headers){
 }
 
 size_t imageWriteCallback(char *ptr, size_t size, size_t nmemb, void *userdata){
-	vector imageVector = *((vector*) userdata);
-	size_t incomingSize = size * nitems;
+	std::vector<int> imageVector = *((std::vector<int> *) userdata);
+	size_t incomingSize = size * nmemb;
 	if(!incomingSize){
 		return 0;
 	}
