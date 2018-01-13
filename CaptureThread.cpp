@@ -10,6 +10,9 @@
 
 using namespace std;
 
+extern vector<char> newestImage;
+extern mutex imageVectorMutex;
+
 const string ipAddr = "http://192.168.0.10/";
 
 void CaptureThread(){
@@ -91,7 +94,42 @@ std::size_t postDataCallBack(char *buffer, size_t size, size_t nitems, void *ins
 	return 0;
 }
 
+void getPicture(Curl *curl, struct curl_slist *headers){
+	//take a picture
+	get("exec_takemotion.cgi", curl, headers);
 
+	//recover the picture
+	//basically a get request that reads the responce into the vector
+	string link = ipAddr + "exec_storeimage.cgi";
+	
+	if (curl) {
+		curl_easy_setopt(curl, CURLOPT_URL, link.c_str());
+		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, headers);
+		newestImage.clear();
+		curl_easy_setopt(curl,  CURLOPT_READDATA, &newestImage);
+		
+		imageVectorMutex.lock();
+		CURLcode res = curl_easy_perform(curl);
+		imageVectorMutex.unlock();
+		
+		if (res != CURLE_OK) { //Check for errors
+			cout << "curl_easy_perform() failed: " << stderr << endl;
+			curl_easy_strerror(res);
+		}
+	}
+}
 
-
+size_t imageWriteCallback(char *ptr, size_t size, size_t nmemb, void *userdata){
+	vector imageVector = *((vector*) userdata);
+	size_t incomingSize = size * nitems;
+	if(!incomingSize){
+		return 0;
+	}
+	
+	for(int i = 0; i * sizeof(char) < incomingSize; i++){
+		imageVector.push_back(ptr[i]);
+	}
+	return incomingSize;
+}
 

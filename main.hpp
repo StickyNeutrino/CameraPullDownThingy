@@ -12,4 +12,10 @@
 #include <stdio.h>
 #include <thread>
 #include "CaptureThread.hpp"
+#include <mutex>
+#include <vector>
+
+std::vector<char> newestImage;
+std::mutex imageVectorMutex;
+
 

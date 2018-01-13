@@ -11,24 +11,28 @@
 #include <iostream>
 #include <curl/curl.h>
 #include <string>
+#include <vector> 
+#include <mutex>
 
 struct postData{
 	const char *readptr;
 	size_t sizeleft;
 };
 
+//Post data without reading the results
 void post(std::string link, std::string command, CURL *curl, std::string body,
 			 struct curl_slist	*headers);
 
+//Get request without reading, used for commands
 void get(std::string link, std::string command,
 			 CURL *curl, struct curl_slist *headers);
 
 void CaptureThread();
 
-void initCamera(CURL *curl, struct curl_slist *headers);
 //Set up camera options for use
+void initCamera(CURL *curl, struct curl_slist *headers);
 
-
+//used by post
 std::size_t postDataCallBack(char *buffer, size_t size, size_t nitems, void *instream);
 
 const std::string File_WIFI_Data =
