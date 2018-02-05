@@ -17,6 +17,9 @@ const string ipAddr = "http://192.168.0.10/";
 
 void CaptureThread(){
 	//Headers
+	
+	std::cout << File_WIFI_Data << std::endl;
+
 	struct curl_slist *headers = NULL;
 	headers = curl_slist_append(headers, "user-agent: OlympusCameraKit");
 	headers = curl_slist_append(headers, "content-length: 4096");
@@ -27,7 +30,7 @@ void CaptureThread(){
 	//End setup
 	
 	initCamera(curl, headers);
-	
+	return;
 	for(;;){
 		getPicture(curl, headers);
 		/* sleep defined in <unistd.h> */
@@ -43,6 +46,7 @@ void get(string command, CURL *curl, struct curl_slist *headers) {
 	
 	if (curl) {
 		curl_easy_setopt(curl, CURLOPT_URL, link.c_str());
+		cout << endl << link << endl;
 		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 		CURLcode res = curl_easy_perform(curl);
 		
@@ -58,6 +62,7 @@ void post(string command, string body, CURL *curl, struct curl_slist *headers) {
 	string link = ipAddr + command;
 	
 	if (curl) {
+		cout << endl << link << endl;
 		struct postData bodyData;
 		bodyData.readptr = body.c_str();
 		bodyData.sizeleft = body.size();
@@ -80,9 +85,17 @@ void post(string command, string body, CURL *curl, struct curl_slist *headers) {
 }
 
 void initCamera(CURL *curl, struct curl_slist *headers){
-	/* put camera in record mode */
+	
+	get("get_connectmode.cgi", curl, headers);
+	
 	get("switch_cameramode.cgi?mode=rec", curl, headers);
+
+	//get("exec_takemisc.cgi?com=startliveview&port=5555", curl, headers);
+	/* put camera in record mode */
+	//get("get_camprop.cgi?com=get&propname=TAKE_DRIVE",curl, headers);
+	//post("set_camprop.cgi?com=set&propname=TAKE_DRIVE",SHOOTMODE_DATA, curl, headers);
 	/* tell camera not to save photos to SD card */
+	get("get_camprop.cgi?com=get&propname=DESTINATION_FILE", curl, headers);
 	post("set_camprop.cgi?com=set&propname=DESTINATION_FILE",File_WIFI_Data, curl, headers);
 }
 
@@ -109,8 +122,7 @@ std::size_t postDataCallBack(char *buffer, size_t size, size_t nitems, void *ins
 
 void getPicture(CURL *curl, struct curl_slist *headers){
 	//take a picture
-	get("exec_takemotion.cgi", curl, headers);
-
+	get("exec_takemotion.cgi?com=newstarttake", curl, headers);
 	//recover the picture
 	//basically a get request that reads the responce into the vector
 	string link = ipAddr + "exec_storeimage.cgi";

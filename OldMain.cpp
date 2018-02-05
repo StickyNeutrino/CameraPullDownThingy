@@ -11,7 +11,7 @@ void setup() {
 void request(string link, string command, CURL *curl, struct curl_slist *headers);
 
 int main() {
-    string air = "http://192.168.0.10/";
+    string air = "http://192.168.0.10:80/";
     //Headers
     struct curl_slist *headers = NULL;
     headers = curl_slist_append(headers, "user-agent: OlympusCameraKit");

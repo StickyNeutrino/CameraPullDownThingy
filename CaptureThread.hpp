@@ -45,7 +45,16 @@ void getPicture(CURL *curl, struct curl_slist *headers);
 const std::string File_WIFI_Data =
 "<?xml version=\"1.0\"?>"
 "<set>"
-"<value>:"
+"<value>"
 "DESTINATION_FILE_WIFI"
 "</value>"
-"</set>";
+"</set>\n";
+
+const std::string SHOOTMODE_DATA =
+"<?xml version=\"1.0\"?>"
+"<set>"
+"<value>"
+"DRIVE_NORMAL"
+"</value>"
+"</set>\n";
+
