@@ -30,7 +30,6 @@ void CaptureThread(){
 	//End setup
 	
 	initCamera(curl, headers);
-	return;
 	for(;;){
 		getPicture(curl, headers);
 		/* sleep defined in <unistd.h> */
@@ -63,7 +62,6 @@ void post(string command, string body, CURL *curl, struct curl_slist *headers) {
 	
 	if (curl) {
 		cout << endl << link << endl;
-		struct postData bodyData;
 		curl_easy_setopt(curl, CURLOPT_URL, link.c_str());
 		curl_easy_setopt(curl,  CURLOPT_POSTFIELDS, body.c_str());
 		
