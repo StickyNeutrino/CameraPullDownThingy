@@ -22,7 +22,7 @@ void CaptureThread(){
 
 	struct curl_slist *headers = NULL;
 	headers = curl_slist_append(headers, "user-agent: OlympusCameraKit");
-	headers = curl_slist_append(headers, "content-length: 4096");
+	//headers = curl_slist_append(headers, "content-length: 4096");
 	
 	//Set up CURL
 	CURL *curl; //create state for CURL called "curl"
@@ -64,14 +64,8 @@ void post(string command, string body, CURL *curl, struct curl_slist *headers) {
 	if (curl) {
 		cout << endl << link << endl;
 		struct postData bodyData;
-		bodyData.readptr = body.c_str();
-		bodyData.sizeleft = body.size();
 		curl_easy_setopt(curl, CURLOPT_URL, link.c_str());
-		curl_easy_setopt(curl, CURLOPT_POST, 1L);
-		
-		/*Define the write callback and data for it */
-		curl_easy_setopt(curl,  CURLOPT_READFUNCTION, postDataCallBack);
-		curl_easy_setopt(curl,  CURLOPT_READDATA, &bodyData);
+		curl_easy_setopt(curl,  CURLOPT_POSTFIELDS, body.c_str());
 		
 		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 		
@@ -97,28 +91,9 @@ void initCamera(CURL *curl, struct curl_slist *headers){
 	/* tell camera not to save photos to SD card */
 	get("get_camprop.cgi?com=get&propname=DESTINATION_FILE", curl, headers);
 	post("set_camprop.cgi?com=set&propname=DESTINATION_FILE",File_WIFI_Data, curl, headers);
+	get("get_camprop.cgi?com=get&propname=DESTINATION_FILE", curl, headers);
 }
 
-/*basically this funiton gets called by libcurl when it needs data for a post*/
-std::size_t postDataCallBack(char *buffer, size_t size, size_t nitems, void *instream){
-	struct postData *data = (struct postData *)instream;
-	size_t buffer_size = size * nitems;
- 
-	if(data->sizeleft) {
-		/* copy as much as possible from the source to the destination */
-		size_t copy_this_much = data->sizeleft;
-		if(copy_this_much > buffer_size){
-			copy_this_much = buffer_size;
-		}
-		memcpy(buffer, data->readptr, copy_this_much);
-		
-		data->readptr += copy_this_much;
-		data->sizeleft -= copy_this_much;
-		return copy_this_much; /* we copied this many bytes */
-		
-	}
-	return 0;
-}
 
 void getPicture(CURL *curl, struct curl_slist *headers){
 	//take a picture
