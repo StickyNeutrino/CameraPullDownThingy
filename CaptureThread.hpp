@@ -13,6 +13,7 @@
 #include <string>
 #include <vector> 
 #include <mutex>
+#include <stdio.h>
 #include <unistd.h>
 
 /* Post data without reading the results, used for commands */
@@ -20,8 +21,7 @@ void post(std::string link, std::string command, CURL *curl, std::string body,
 			 struct curl_slist	*headers);
 
 /* Get request without reading, used for commands */
-void get(std::string link, std::string command,
-			 CURL *curl, struct curl_slist *headers);
+void get(std::string command, CURL *curl, struct curl_slist *headers);
 
 void CaptureThread();
 
