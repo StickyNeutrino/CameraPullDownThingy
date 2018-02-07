@@ -2,7 +2,7 @@
 CC = g++
 
 #flags
-CFLAGS = -Wall
+CFLAGS = -Wall -O3
 
 default : ImagePullDownThingy
 
