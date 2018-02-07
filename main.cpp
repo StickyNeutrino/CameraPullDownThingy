@@ -4,9 +4,9 @@
 
 int main(){
     std::thread captureThread(CaptureThread);
-	//std::thread deliveryThread(DeliveryThread);
+	std::thread deliveryThread(DeliveryThread);
 	
-	//deliveryThread.join();
+	deliveryThread.join();
 	captureThread.join();
     return 0;
 }
