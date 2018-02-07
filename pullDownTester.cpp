@@ -30,7 +30,7 @@ int main(){
 	
 	address.sin_family = AF_INET;
 	address.sin_addr.s_addr = inet_addr("127.0.0.1");
-	address.sin_port = htons( 2048 );
+	address.sin_port = htons( 2418 );
 	
 	connect(recSocket, (struct sockaddr *)&address, addrlen);
 
