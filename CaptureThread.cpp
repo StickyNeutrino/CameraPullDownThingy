@@ -16,13 +16,13 @@ extern mutex imageVectorMutex;
 const string ipAddr = "http://192.168.0.10/";
 
 void CaptureThread(){
-	//Headers
 	
 	std::cout << File_WIFI_Data << std::endl;
 
 	struct curl_slist *headers = NULL;
+	
+	//nessesary so the camera will talk to us
 	headers = curl_slist_append(headers, "User-Agent: OlympusCameraKit");
-	//headers = curl_slist_append(headers, "content-length: 4096");
 	
 	//Set up CURL
 	CURL *curl; //create state for CURL called "curl"
@@ -30,12 +30,15 @@ void CaptureThread(){
 	//End setup
 	
 	initCamera(curl, headers);
+	
+	//Currently will only take 1000 photos before it stops
 	for(int i = 0; i < 1000; i++){
 		getPicture(curl, headers);
 		/* sleep defined in <unistd.h> */
 		sleep(2);
 	}
 	
+	//turns off the camera but not really nessesary
 	get("exec_pwoff.cgi", curl, headers);
 	
 	curl_easy_cleanup(curl); //ALWAYS HAVE THIS - frees CURL resources
@@ -60,7 +63,10 @@ void get(string command, CURL *curl, struct curl_slist *headers) {
 
 void post(string command, string body, struct curl_slist *headers) {
 	/* make URL */
+	
+	//This sleep is maybe nessary but defitly can be less then 2
 	sleep(2);
+	
 	string link = ipAddr + command;
 	
 	
@@ -71,9 +77,10 @@ void post(string command, string body, struct curl_slist *headers) {
 		cout << endl << link << endl;
 		struct curl_slist *NewHeaders;
 		curl_easy_setopt(curl, CURLOPT_URL, link.c_str());
+		
 		NewHeaders = curl_slist_append(headers, "Content-type:");
-		//headers = curl_slist_append(headers, "Content-Length:");
 		NewHeaders = curl_slist_append(NewHeaders, "Accept:");
+		
 		curl_easy_setopt(curl,  CURLOPT_POSTFIELDS, body.c_str());
 		
 		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
@@ -117,14 +124,18 @@ void getPicture(CURL *curl, struct curl_slist *headers){
 	string link = ipAddr + "exec_storeimage.cgi";
 	
 	if (curl) {
+		//sleep is not nesseary but without it
+		//we need to listen for an event from the camera
 		sleep(1);
+		
 		curl_easy_setopt(curl, CURLOPT_URL, link.c_str());
 		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+		
+		//Tells curl what funtion to pass all data (the image) into
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, imageWriteCallback);
-		//FILE* filePtr = fopen("/Users/danielfitchmun/Desktop/Tech/CameraPullDownThingy/Testing.jpg","wb");
 
 		curl_easy_setopt(curl, CURLOPT_WRITEDATA, &newestImage);
-		//curl_easy_setopt(curl, CURLOPT_WRITEDATA,filePtr);
+		
 		/* lock the mutex so other thread allways gets full image */
 		imageVectorMutex.lock();
 		
@@ -139,7 +150,6 @@ void getPicture(CURL *curl, struct curl_slist *headers){
 			cout << "curl_easy_perform() failed: " << stderr << endl;
 			curl_easy_strerror(res);
 		}
-		//fclose(filePtr);
 	}
 
 }
