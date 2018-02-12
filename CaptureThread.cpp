@@ -33,6 +33,7 @@ void CaptureThread(){
 	
 	//Currently will only take 1000 photos before it stops
 	for(int i = 0; i < 1000; i++){
+		checkConnection(curl, headers)
 		getPicture(curl, headers);
 		/* sleep defined in <unistd.h> */
 		sleep(2);
@@ -42,6 +43,24 @@ void CaptureThread(){
 	get("exec_pwoff.cgi", curl, headers);
 	
 	curl_easy_cleanup(curl); //ALWAYS HAVE THIS - frees CURL resources
+}
+
+bool checkConnection(CURL *curl, struct curl_slist *headers){
+	if (!curl) {
+		return;
+	}
+	curl_easy_setopt(curl, CURLOPT_TIMEOUT, 2L);
+	curl_easy_setopt(curl, CURLOPT_URL, link.c_str());
+	cout << endl << link << endl;
+	curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+	CURLcode res = curl_easy_perform(curl);
+	
+	if (res == CURLE_COULDNT_CONNECT || res == CURLE_OPERATION_TIMEDOUT) {
+		/* dont really know what to do */
+		return false;
+	}
+	curl_easy_setopt(curl, CURLOPT_TIMEOUT, 0L);
+	return true;
 }
 
 void get(string command, CURL *curl, struct curl_slist *headers) {
