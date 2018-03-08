@@ -33,7 +33,7 @@ void CaptureThread(){
 	
 	//Currently will only take 1000 photos before it stops
 	for(int i = 0; i < 1000; i++){
-		checkConnection(curl, headers)
+		checkConnection(curl, headers);
 		getPicture(curl, headers);
 		/* sleep defined in <unistd.h> */
 		sleep(2);
@@ -47,8 +47,10 @@ void CaptureThread(){
 
 bool checkConnection(CURL *curl, struct curl_slist *headers){
 	if (!curl) {
-		return;
+		return false;
 	}
+	string link = ipAddr + "get_connectmode.cgi";
+	
 	curl_easy_setopt(curl, CURLOPT_TIMEOUT, 2L);
 	curl_easy_setopt(curl, CURLOPT_URL, link.c_str());
 	cout << endl << link << endl;
@@ -182,7 +184,7 @@ size_t imageWriteCallback(char *ptr, size_t size, size_t nmemb, void *userdata){
 		return 0;
 	}
 	int i = 0;
-	for(i; i * sizeof(char) < incomingSize; i++){
+	for(; i * sizeof(char) < incomingSize; i++){
 		/* push all data into vector */
 		imageVector->push_back(ptr[i]);
 	}

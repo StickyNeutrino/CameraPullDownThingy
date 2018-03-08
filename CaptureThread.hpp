@@ -28,6 +28,9 @@ void CaptureThread();
 /* Set up camera options for use */
 void initCamera(CURL *curl, struct curl_slist *headers);
 
+/* Check if your connected to a network*/
+bool checkConnection(CURL *curl, struct curl_slist *headers);
+
 /* Callback for getPictures request */
 size_t imageWriteCallback(char *ptr, size_t size, size_t nmemb, void *userdata);
 
